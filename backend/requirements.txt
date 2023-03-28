@@ -1,0 +1,6 @@
+Django==4.1.7
+django-allauth==0.53.1
+django-filter==22.1
+djangorestframework==3.14.0
+docker==6.0.1
+shortuuid==1.0.11

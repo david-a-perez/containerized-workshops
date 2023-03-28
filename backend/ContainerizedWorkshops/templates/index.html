@@ -1,0 +1,23 @@
+{% load socialaccount %}
+<html>
+<body>
+<h1>Login Testing Screen </h1>
+{% if user.is_authenticated %}
+  <p>
+    Name: {{user.first_name}} {{user.last_name}}<br>
+    Username: {{ user.username }} <br>
+    Email: {{user.email}} <br>
+    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" />
+  </p>
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+  </form>
+{% else %}
+  <form method="post" action="{% provider_login_url 'google' %}">
+    {% csrf_token %}
+    <button type="submit">Login</button>
+  </form>
+{% endif %}
+</body>
+</html>
