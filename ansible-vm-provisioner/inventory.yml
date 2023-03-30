@@ -11,6 +11,8 @@ cloud:
       hosts:
         worker1:
           ansible_host: 129.114.25.151
+        worker2:
+          ansible_host: 129.114.26.6
       vars:
         flavor: m1.large
   vars:
