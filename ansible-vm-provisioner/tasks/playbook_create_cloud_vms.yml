@@ -1,0 +1,32 @@
+---
+#
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Ethan Piper
+# Updated by: David Perez
+#
+# This playbook will create VMs as specified on the desired cloud platform
+# See https://docs.ansible.com/ansible/latest/collections/openstack/cloud/server_module.html
+- hosts: cloud
+  gather_facts: no
+  tasks:
+    - name: "Create Chameleon Cloud VMs"
+      openstack.cloud.server:
+        state: present
+        cloud: "CHI-221026"
+        name: "Group3-{{ inventory_hostname }}"
+        floating_ips: "{{ ansible_host }}"
+        image: "CC-Ubuntu20.04"
+        key_name: Group3-key
+        timeout: 300
+        flavor: "{{ flavor }}"
+        availability_zone: "nova"
+        nics:
+          - net-name: sharednet1
+      delegate_to: localhost
+
+    # Wait for the ssh connections to be online
+    - name: Check Connections
+      ansible.builtin.wait_for_connection:
+        connect_timeout: 5
+        timeout: 150

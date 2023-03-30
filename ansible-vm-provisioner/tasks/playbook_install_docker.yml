@@ -1,0 +1,30 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Ethan Piper
+
+- hosts: workers
+  gather_facts: no
+  tasks:
+    - name: Install apt-transport-https, ca-certificates, curl, software-properties-common
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        update_cache: yes
+      become: yes
+
+    - name: Add apt repository for docker
+      ansible.builtin.shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+      become: yes
+
+    - name: Install docker-ce
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+        update_cache: yes
+      become: yes
