@@ -1,5 +1,12 @@
 from rest_framework import serializers
 from .models import Workshop, Participant
+from django.contrib.auth.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email')
 
 
 class WorkshopSerializer(serializers.ModelSerializer):
@@ -10,6 +17,15 @@ class WorkshopSerializer(serializers.ModelSerializer):
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = ('__all__')
+
+
+class ParticipantReadSerializer(serializers.ModelSerializer):
+    workshop = WorkshopSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Participant
         fields = ('__all__')
