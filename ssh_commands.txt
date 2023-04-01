@@ -1,0 +1,24 @@
+This file contains commands to (manually) connect to a container on chameleon cloud via SSH. 
+This is one approach I found that works - let me know if you are able to replicate it.
+I will look into generating code to automate this process and can integrate it with the backend.
+
+# Inside chameleon VM (assumes docker is already installed)
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+docker run -it -p 2222:22 ubuntu
+
+# Inside ubuntu container
+mkdir ~/.ssh
+touch ~/.ssh/authorized_keys
+echo {PUBLIC_KEY} >> ~/.ssh/authorized_keys
+chmod 400 ~/.ssh/authorized_keys
+
+apt-get update
+apt-get install -y ssh
+service ssh start
+
+# On local machine
+nano ~/.ssh/container_ssh.pem (add {PRIVATE_KEY} here)
+chmod 400 ~/.ssh/container_ssh.pem
+ssh -p 2222 -i ~/.ssh/container_ssh.pem root@{WORKER_3_IP}
