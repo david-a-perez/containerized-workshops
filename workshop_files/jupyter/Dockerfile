@@ -16,7 +16,7 @@ RUN echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 RUN apt update \
     && apt install -y python3-pip \
     && pip3 install --upgrade pip \
-    && pip3 install notebooka
+    && pip3 install notebook
 
 EXPOSE 22
 EXPOSE 8888

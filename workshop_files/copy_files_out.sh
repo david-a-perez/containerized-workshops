@@ -3,6 +3,6 @@
 CONFIG="$HOME/.ssh/config"
 
 WORKSHOP_NAME="data-science"
-USER="root"
+WORKSHOP_USER="root"
 
-scp -r $USER@$WORKSHOP_NAME-workshop:/$USER/workshop .
+scp -r $USER@$WORKSHOP_NAME-workshop:/$WORKSHOP_USER/workshop .
