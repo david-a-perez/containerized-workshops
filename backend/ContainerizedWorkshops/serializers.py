@@ -44,3 +44,4 @@ class ContainerSerializer(serializers.Serializer):
     public_ip = serializers.IPAddressField(read_only=True)
     exposed_ports = PortSerializer(read_only=True, many=True)
     status = serializers.CharField(read_only=True)
+    public_key = serializers.CharField()

@@ -136,11 +136,14 @@ class ContainerViewSet(viewsets.ViewSet):
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
         container: Container = client.containers.run(
             participant.workshop.docker_tag, auto_remove=True, detach=True,
-            environment={"SSH_PUBLIC_KEY": "ABCD"},
-            ports={'80/tcp': None},
+            environment={"SSH_PUBLIC_KEY": request.data["public_key"]},
+            publish_all_ports=True,
             labels={Labels.workshop_id.value: str(participant.workshop.pk),
                     Labels.user_id.value: str(participant.user.pk),
-                    Labels.participant_id.value: str(participant.pk)})  # type: ignore
+                    Labels.participant_id.value: str(participant.pk)},
+            cpu_period=100000,
+            cpu_quota=50000,
+            mem_limit="1g")  # type: ignore
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
 
