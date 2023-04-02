@@ -95,9 +95,18 @@ class ContainerViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        client = docker.from_env()
+        workshop_id_label = f"{Labels.workshop_id.value}={request.query_params['workshop_id']}" if "workshop_id" in request.query_params else Labels.workshop_id.value
+        participant_id_label = f"{Labels.participant_id.value}={request.query_params['participant_id']}" if "participant_id" in request.query_params else Labels.participant_id.value
+
+        if request.user.is_superuser:
+            user_id_label = f"{Labels.user_id.value}={request.query_params['user_id']}" if "user_id" in request.query_params else Labels.user_id.value
+        else:
+            user_id_label = f"{Labels.user_id.value}={request.user.pk}"
+
+        client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
+
         containers: "list[Container]" = client.containers.list(all=True, filters={
-            "label": [f"{Labels.user_id.value}={request.user.id}"]})  # type: ignore
+            "label": [workshop_id_label, user_id_label, participant_id_label]})  # type: ignore
         serializer = ContainerSerializer([serialize_container(
             container) for container in containers], many=True)
         return Response(serializer.data)

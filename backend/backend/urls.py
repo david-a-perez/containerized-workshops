@@ -23,6 +23,7 @@ router = routers.DefaultRouter()
 router.register(r'workshop', views.WorkshopView, 'workshop')
 router.register(r'participant', views.ParticipantView, 'participant')
 router.register(r'containers', views.ContainerViewSet, 'container')
+router.register(r'user', views.UserViewSet, 'user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
