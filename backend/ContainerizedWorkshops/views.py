@@ -7,8 +7,12 @@ from rest_framework.exceptions import APIException, PermissionDenied
 
 import docker
 from docker.models.containers import Container
-from .serializers import ParticipantReadSerializer, WorkshopSerializer, ParticipantSerializer, ContainerSerializer
+from django.contrib.auth.models import User
+from .serializers import ParticipantReadSerializer, WorkshopSerializer, ParticipantSerializer, ContainerSerializer, UserSerializer
 from .models import Workshop, Participant
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # TODO: reminder to use get_serializer_class to have seperate read and write serializers
 # TODO: reminder to use permissions
@@ -91,17 +95,9 @@ class ContainerViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        workshop_id_label = f"{Labels.workshop_id.value}={request.query_params['workshop_id']}" if "workshop_id" in request.query_params else Labels.workshop_id.value
-        participant_id_label = f"{Labels.participant_id.value}={request.query_params['participant_id']}" if "participant_id" in request.query_params else Labels.participant_id.value
-
-        if request.user.is_superuser:
-            user_id_label = f"{Labels.user_id.value}={request.query_params['user_id']}" if "user_id" in request.query_params else Labels.user_id.value
-        else:
-            user_id_label = f"{Labels.user_id.value}={request.user.pk}"
-
-        client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
+        client = docker.from_env()
         containers: "list[Container]" = client.containers.list(all=True, filters={
-            "label": [workshop_id_label, user_id_label, participant_id_label]})  # type: ignore
+            "label": [f"{Labels.user_id.value}={request.user.id}"]})  # type: ignore
         serializer = ContainerSerializer([serialize_container(
             container) for container in containers], many=True)
         return Response(serializer.data)
@@ -149,3 +145,24 @@ class ContainerViewSet(viewsets.ViewSet):
         container.stop()
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
+    
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset automatically provides `list` and `retrieve` actions.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=False, methods=['get'], permission_classes=[])
+    @method_decorator(ensure_csrf_cookie)
+    def get_user_data(self, request):
+        return Response({
+            "is_logged_in": request.user.is_authenticated,
+            "is_admin": request.user.is_staff and request.user.is_superuser,
+            "id": request.user.id,
+            "email": getattr(request.user, 'email', None),
+            "first_name": getattr(request.user, 'first_name', None),
+            "last_name": getattr(request.user, 'last_name', None),
+        })
