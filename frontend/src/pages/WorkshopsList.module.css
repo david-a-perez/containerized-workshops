@@ -2,7 +2,19 @@
 	padding-top: 1%;
 }
 
+.modalContainer{
+	padding: 3%;
+}
+
 .joinWorkshopButton {
 	font-size: medium;
 	float: right;
+}
+
+.modalJoinButton {
+	float: right;
+}
+
+.modalCodeInput {
+	margin-bottom: 20px;
 }

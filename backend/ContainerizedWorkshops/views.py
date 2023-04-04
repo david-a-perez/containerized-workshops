@@ -48,7 +48,7 @@ class WorkshopView(viewsets.ModelViewSet):
     queryset = Workshop.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
     # TODO: filter probably not necessary
-    filterset_fields = ['title']
+    filterset_fields = ['title', 'participants']
 
 
 class ParticipantView(viewsets.ModelViewSet):
@@ -87,7 +87,8 @@ def serialize_container(container: Container):
     ports = [{"protocol": port.split("/")[1], "container_port": port.split("/")[0], "host_port": host_ports[0]
               ['HostPort'] if host_ports and len(host_ports) > 0 else None} for port, host_ports in ports.items()]
     return {"id": container.id, "participant": Participant.objects.filter(
-        pk=container.labels[Labels.participant_id.value]).first(), "exposed_ports": ports, "public_ip": "127.0.0.1"}
+        pk=container.labels[Labels.participant_id.value]).first(), "exposed_ports": ports, "public_ip": "127.0.0.1", 
+        "public_key":  next(env.split("=", 1)[1] for env in container.attrs["Config"]["Env"] if env.startswith("SSH_PUBLIC_KEY="))}
 
 
 class ContainerViewSet(viewsets.ViewSet):

@@ -15,7 +15,7 @@ interface PropType{
 function Layout(props : PropType) {
   return (
     <div>
-      <MainNavigation csrfToken={props.csrfToken}/>
+      <MainNavigation csrfToken={props.csrfToken} userData={props.userData} />
       <main className={classes.main}>{props.children}</main>
     </div>
   );

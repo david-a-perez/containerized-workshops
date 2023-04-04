@@ -10,6 +10,8 @@ import {
 } from "react-bootstrap";
 
 import { CSRFTOKEN } from "../../csrfToken";
+import { UserDataInterface } from "../../App";
+import classes from "./MainNavigation.module.css";
 
 /**
  * Link to Homepage
@@ -18,12 +20,13 @@ import { CSRFTOKEN } from "../../csrfToken";
  * Link to /admin for admins only
  */
 interface mainNavProps {
-  csrfToken: string | null
+  csrfToken: string | null;
+  userData?: UserDataInterface;
 }
 
-function MainNavigation(props : mainNavProps) {
+function MainNavigation(props: mainNavProps) {
   return (
-    <Navbar collapseOnSelect bg="info" variant="light" expand="md">
+    <Navbar collapseOnSelect variant="dark" expand="md" className={classes.navBar}>
       <Container>
         <Navbar.Brand as={Link} to={"/"}>
           Containerized Workshops
@@ -31,21 +34,49 @@ function MainNavigation(props : mainNavProps) {
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to={"/workshops"}>
-              Workshop List
-            </Nav.Link>
-            <Nav.Link as={Link} to={"/test"}>
-              Container List
-            </Nav.Link>
-            <Nav.Link as={Link} to={"/"}>
-              Django Admin Page
-            </Nav.Link>
+            {props.userData?.is_logged_in ? (
+              <Nav.Link as={Link} to={"/workshops"}>
+                Workshop List
+              </Nav.Link>
+            ) : (
+              <></>
+            )}
+            {props.userData?.is_admin ? (
+              <Nav.Link as={Link} to={"/test"}>
+                Container List
+              </Nav.Link>
+            ) : (
+              <></>
+            )}
+
+            {props.userData?.is_admin ? (
+              <Nav.Link as={Link} to={"/"}>
+                Django Admin Page
+              </Nav.Link>
+            ) : (
+              <></>
+            )}
           </Nav>
           <Nav>
-            <Form className="d-flex">
-              <CSRFTOKEN csrftoken={props.csrfToken} />
-              <Button variant="outline-success">Login</Button>
-            </Form>
+            {!props.userData?.is_logged_in ? (
+              <Form
+                className="d-flex"
+                action="/accounts/google/login/"
+                method="post"
+              >
+                <CSRFTOKEN csrftoken={props.csrfToken} />
+                <Button variant="outline-success" type="submit">
+                  Sign In
+                </Button>
+              </Form>
+            ) : (
+              <Form className="d-flex" action="/accounts/logout/" method="post">
+                <CSRFTOKEN csrftoken={props.csrfToken} />
+                <Button variant="outline-light" type="submit">
+                  Sign Out
+                </Button>
+              </Form>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

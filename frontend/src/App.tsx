@@ -12,6 +12,12 @@ import Layout from './components/layout/Layout';
 import { useState, useEffect } from "react";
 import { getCsrfToken } from "./csrfToken";
 import axios from "axios";
+import Homepage from './pages/Homepage';
+import WorkshopInfo from './pages/WorkshopInfo';
+
+axios.defaults.xsrfCookieName = "csrfToken";
+axios.defaults.xsrfHeaderName = "X-CSRFToken";
+axios.defaults.withCredentials = true;
 
 export interface UserDataInterface {
     is_logged_in?: boolean;
@@ -50,9 +56,11 @@ function App() {
     <div>
       <Layout csrfToken={csrfToken} userData={userData}>
         <Routes>
-          <Route path="/" element={<BasicButton />} />
-          <Route path="/workshops" element={<WorkshopsList />} />
-          {/* <Route path="/test" element={}} /> */}
+          <Route path="/" element={<Homepage />} />
+          <Route path="/workshops" element={<WorkshopsList userData={userData}/>} />
+          {/* <Route path="/workshop:workshop_id" element={} */}
+          <Route path="/test" element={<BasicButton />} />
+          <Route path="/workshop/info/:workshop_id" element={<WorkshopInfo />} />
         </Routes>
       </Layout>
     </div>

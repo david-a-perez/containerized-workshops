@@ -1,21 +1,29 @@
 import classes from "./WorkshopItem.module.css";
 
-import { Card } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
-interface WorkProp {
-  workshop: { [key: string]: string | number};
+export interface WorkProp {
+  workshop: { ["id"]: string, [key: string]: string | number};
 	onClick?: (id: string) => any;
 }
 
 function WorkshopItem(props: WorkProp) {
+  const navigate = useNavigate();
+
+  const onClickViewWorkshop = () => {
+    navigate("/workshop/info/" + props.workshop["id"], { state: props})
+  }
+
   return (
-    <Card>
+    <Card className={classes.card}>
       <Card.Body>
-				<Card.Header as="h2">{props.workshop["header"]}</Card.Header>
-				<Card.Title>{props.workshop["title"]}</Card.Title>
+				<Card.Header as="h2">{props.workshop["title"]}</Card.Header>
+				<Card.Title>{props.workshop["docker_tag"]}</Card.Title>
         <Card.Text>
-          {props.workshop['desc']} 
+          {props.workshop['description']} 
         </Card.Text>
+        <Button variant="outline-dark" className={classes.ViewButton} onClick={onClickViewWorkshop}>View Workshop</Button>
       </Card.Body>
     </Card>
   );
