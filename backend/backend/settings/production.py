@@ -9,6 +9,10 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['localhost']
 
+STATIC_URL = "/dj_static/"
+STATIC_ROOT = "/var/www/vandylifts.com/static"
+STATICFILES_DIRS = [ BASE_DIR /  "../frontend/build"]
+
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
