@@ -28,3 +28,9 @@
           - docker-ce
         update_cache: yes
       become: yes
+
+    - name: Add user to the docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes

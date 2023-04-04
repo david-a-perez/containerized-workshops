@@ -7,7 +7,11 @@ CORS_ORIGIN_WHITELIST = [
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
+
+STATIC_URL = "/dj_static/"
+STATIC_ROOT = "/var/www/containerizedworkshops.com/static"
+STATICFILES_DIRS = [ BASE_DIR /  "../frontend/build"]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
