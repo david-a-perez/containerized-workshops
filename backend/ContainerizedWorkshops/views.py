@@ -7,8 +7,12 @@ from rest_framework.exceptions import APIException, PermissionDenied
 
 import docker
 from docker.models.containers import Container
-from .serializers import ParticipantReadSerializer, WorkshopSerializer, ParticipantSerializer, ContainerSerializer
+from django.contrib.auth.models import User
+from .serializers import ParticipantReadSerializer, WorkshopSerializer, ParticipantSerializer, ContainerSerializer, UserSerializer
 from .models import Workshop, Participant
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # TODO: reminder to use get_serializer_class to have seperate read and write serializers
 # TODO: reminder to use permissions
@@ -44,7 +48,7 @@ class WorkshopView(viewsets.ModelViewSet):
     queryset = Workshop.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
     # TODO: filter probably not necessary
-    filterset_fields = ['title']
+    filterset_fields = ['title', 'participants']
 
 
 class ParticipantView(viewsets.ModelViewSet):
@@ -83,7 +87,8 @@ def serialize_container(container: Container):
     ports = [{"protocol": port.split("/")[1], "container_port": port.split("/")[0], "host_port": host_ports[0]
               ['HostPort'] if host_ports and len(host_ports) > 0 else None} for port, host_ports in ports.items()]
     return {"id": container.id, "participant": Participant.objects.filter(
-        pk=container.labels[Labels.participant_id.value]).first(), "exposed_ports": ports, "public_ip": "127.0.0.1"}
+        pk=container.labels[Labels.participant_id.value]).first(), "exposed_ports": ports, "public_ip": "127.0.0.1", 
+        "public_key":  next(env.split("=", 1)[1] for env in container.attrs["Config"]["Env"] if env.startswith("SSH_PUBLIC_KEY="))}
 
 
 class ContainerViewSet(viewsets.ViewSet):
@@ -100,6 +105,7 @@ class ContainerViewSet(viewsets.ViewSet):
             user_id_label = f"{Labels.user_id.value}={request.user.pk}"
 
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
+
         containers: "list[Container]" = client.containers.list(all=True, filters={
             "label": [workshop_id_label, user_id_label, participant_id_label]})  # type: ignore
         serializer = ContainerSerializer([serialize_container(
@@ -131,11 +137,14 @@ class ContainerViewSet(viewsets.ViewSet):
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
         container: Container = client.containers.run(
             participant.workshop.docker_tag, auto_remove=True, detach=True,
-            environment={"SSH_PUBLIC_KEY": "ABCD"},
-            ports={'80/tcp': None},
+            environment={"SSH_PUBLIC_KEY": request.data["public_key"]},
+            publish_all_ports=True,
             labels={Labels.workshop_id.value: str(participant.workshop.pk),
                     Labels.user_id.value: str(participant.user.pk),
-                    Labels.participant_id.value: str(participant.pk)})  # type: ignore
+                    Labels.participant_id.value: str(participant.pk)},
+            cpu_period=100000,
+            cpu_quota=50000,
+            mem_limit="1g")  # type: ignore
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
 
@@ -149,3 +158,24 @@ class ContainerViewSet(viewsets.ViewSet):
         container.stop()
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
+    
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset automatically provides `list` and `retrieve` actions.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=False, methods=['get'], permission_classes=[])
+    @method_decorator(ensure_csrf_cookie)
+    def get_user_data(self, request):
+        return Response({
+            "is_logged_in": request.user.is_authenticated,
+            "is_admin": request.user.is_staff and request.user.is_superuser,
+            "id": request.user.id,
+            "email": getattr(request.user, 'email', None),
+            "first_name": getattr(request.user, 'first_name', None),
+            "last_name": getattr(request.user, 'last_name', None),
+        })
