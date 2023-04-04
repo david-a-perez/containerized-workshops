@@ -10,7 +10,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['localhost']
 
 STATIC_URL = "/dj_static/"
-STATIC_ROOT = "/var/www/vandylifts.com/static"
+STATIC_ROOT = "/var/www/containerizedworkshops.com/static"
 STATICFILES_DIRS = [ BASE_DIR /  "../frontend/build"]
 
 # Database
