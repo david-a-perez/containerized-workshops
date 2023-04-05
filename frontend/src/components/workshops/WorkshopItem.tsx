@@ -2,9 +2,10 @@ import classes from "./WorkshopItem.module.css";
 
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { WorkshopDict } from "../../pages/WorkshopsList";
 
 export interface WorkProp {
-  workshop: { ["id"]: string, [key: string]: string | number};
+  workshop: WorkshopDict
 	onClick?: (id: string) => any;
 }
 
@@ -12,7 +13,7 @@ function WorkshopItem(props: WorkProp) {
   const navigate = useNavigate();
 
   const onClickViewWorkshop = () => {
-    navigate("/workshop/info/" + props.workshop["id"], { state: props})
+    navigate("/workshop/" + props.workshop["id"], { state: props["workshop"]})
   }
 
   return (
