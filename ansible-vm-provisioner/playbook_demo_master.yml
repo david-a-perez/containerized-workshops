@@ -4,3 +4,6 @@
 
 - name: "Play 2: Install Docker on workers"
   ansible.builtin.import_playbook: tasks/playbook_install_docker.yml
+
+- name: "Play 2: Install squid on workers"
+  ansible.builtin.import_playbook: tasks/playbook_install_squid.yml

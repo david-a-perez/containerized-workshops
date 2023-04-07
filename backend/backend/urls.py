@@ -21,7 +21,8 @@ from ContainerizedWorkshops import views
 
 router = routers.DefaultRouter()
 router.register(r'workshop', views.WorkshopView, 'workshop')
-router.register(r'participant', views.ParticipantView, 'participant')
+router.register(r'snippet', views.SnippetView, 'snippet')
+router.register(r'tunneled_port', views.TunneledPortView, 'tunneled_port')
 router.register(r'containers', views.ContainerViewSet, 'container')
 router.register(r'user', views.UserViewSet, 'user')
 

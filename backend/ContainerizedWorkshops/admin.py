@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib import admin
-from .models import Workshop, Participant
+from .models import Workshop, Snippet, TunneledPort
 
 # Register your models here.
 
@@ -19,17 +19,14 @@ class WorkshopAdmin(admin.ModelAdmin):
     remove_containers.short_description = "Remove all containers from selected workshops"
 
 
-@admin.register(Participant)
-class ParticipantAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in Participant._meta.fields]
-    actions = ['remove_containers']
+@admin.register(Snippet)
+class SnippetAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Snippet._meta.fields]
 
-    def remove_containers(self, request, queryset):
-        for participant in queryset:
-            # TODO: remove all containers that belong to participant
-            pass
 
-    remove_containers.short_description = "Remove all containers from selected participants"
+@admin.register(TunneledPort)
+class TunneledPortAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in TunneledPort._meta.fields]
 
 
 class UserAdmin(AuthUserAdmin):

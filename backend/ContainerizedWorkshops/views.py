@@ -7,9 +7,10 @@ from rest_framework.exceptions import APIException, PermissionDenied
 
 import docker
 from docker.models.containers import Container
+import secrets
 from django.contrib.auth.models import User
-from .serializers import ParticipantReadSerializer, WorkshopSerializer, ParticipantSerializer, ContainerSerializer, UserSerializer
-from .models import Workshop, Participant
+from .serializers import WorkshopSerializer, WorkshopReadSerializer, SnippetSerializer, TunneledPortSerializer, ContainerSerializer, UserSerializer
+from .models import Workshop, Snippet, TunneledPort
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -44,23 +45,27 @@ class IsAdminOrOwnerParticipant(permissions.BasePermission):
 
 
 class WorkshopView(viewsets.ModelViewSet):
-    serializer_class = WorkshopSerializer
     queryset = Workshop.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
     # TODO: filter probably not necessary
     filterset_fields = ['title', 'participants']
 
-
-class ParticipantView(viewsets.ModelViewSet):
-    queryset = Participant.objects.all()
-    permission_classes = [
-        permissions.IsAuthenticated, IsAdminOrOwnerParticipant]
-    filterset_fields = ['workshop', 'user']
-
     def get_serializer_class(self):
         if self.action == 'create':
-            return ParticipantSerializer
-        return ParticipantReadSerializer
+            return WorkshopSerializer
+        return WorkshopReadSerializer
+
+
+class SnippetView(viewsets.ModelViewSet):
+    serializer_class = SnippetSerializer
+    queryset = Snippet.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
+
+
+class TunneledPortView(viewsets.ModelViewSet):
+    serializer_class = TunneledPortSerializer
+    queryset = TunneledPort.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
 
 
 class NotInWorkshop(APIException):
@@ -79,16 +84,19 @@ class NotAdminOrParticipant(APIException):
 class Labels(str, Enum):
     workshop_id = 'com.containerized-workshops.workshop-id'
     user_id = 'com.containerized-workshops.user-id'
-    participant_id = 'com.containerized-workshops.participant-id'
+    controller_id = 'com.containerized-workshops.controller-id'
+    # participant_id = 'com.containerized-workshops.participant-id'
 
 
 def serialize_container(container: Container):
     ports = container.attrs["NetworkSettings"]["Ports"]  # type: ignore
+    env_vars = container.attrs["Config"]["Env"]  # type: ignore
     ports = [{"protocol": port.split("/")[1], "container_port": port.split("/")[0], "host_port": host_ports[0]
               ['HostPort'] if host_ports and len(host_ports) > 0 else None} for port, host_ports in ports.items()]
-    return {"id": container.id, "participant": Participant.objects.filter(
-        pk=container.labels[Labels.participant_id.value]).first(), "exposed_ports": ports, "public_ip": "127.0.0.1", 
-        "public_key":  next(env.split("=", 1)[1] for env in container.attrs["Config"]["Env"] if env.startswith("SSH_PUBLIC_KEY="))}
+    return {"id": container.id, "workshop": container.labels[Labels.workshop_id.value], "user": container.labels[Labels.user_id.value],
+            "exposed_ports": ports, "public_ip": "127.0.0.1",
+            "public_key": next(env.split("=", 1)[1] for env in env_vars if env.startswith("SSH_PUBLIC_KEY=")),
+            "jupyter_token": next(env.split("=", 1)[1] for env in env_vars if env.startswith("JUYPTER_TOKEN="))}
 
 
 class ContainerViewSet(viewsets.ViewSet):
@@ -97,7 +105,7 @@ class ContainerViewSet(viewsets.ViewSet):
 
     def list(self, request):
         workshop_id_label = f"{Labels.workshop_id.value}={request.query_params['workshop_id']}" if "workshop_id" in request.query_params else Labels.workshop_id.value
-        participant_id_label = f"{Labels.participant_id.value}={request.query_params['participant_id']}" if "participant_id" in request.query_params else Labels.participant_id.value
+        controller_id_label = f"{Labels.controller_id.value}={1}"
 
         if request.user.is_superuser:
             user_id_label = f"{Labels.user_id.value}={request.query_params['user_id']}" if "user_id" in request.query_params else Labels.user_id.value
@@ -107,7 +115,7 @@ class ContainerViewSet(viewsets.ViewSet):
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
 
         containers: "list[Container]" = client.containers.list(all=True, filters={
-            "label": [workshop_id_label, user_id_label, participant_id_label]})  # type: ignore
+            "label": [workshop_id_label, user_id_label, controller_id_label]})  # type: ignore
         serializer = ContainerSerializer([serialize_container(
             container) for container in containers], many=True)
         return Response(serializer.data)
@@ -125,23 +133,33 @@ class ContainerViewSet(viewsets.ViewSet):
 
     def create(self, request):
         # TODO: verify participant does not already have container running
-        if not request.data['participant']:
+        if not request.data['workshop']:
             raise APIException()
-        participant = Participant.objects.filter(
-            pk=request.data['participant']).first()
-        if not participant:
-            raise NotInWorkshop()
-        if not (request.user.is_superuser or participant.user == request.user):
+
+        if not request.data['user']:
+            raise APIException()
+
+        if not (request.user.is_superuser or request.data['user'] == str(request.user.pk)):
             raise NotAdminOrParticipant()
+
+        workshop = Workshop.objects.filter(pk=request.data['workshop']).first()
+
+        if not workshop:
+            raise APIException()
+
+        if not workshop.participants.filter(pk=request.data['user']).exists():
+            raise NotInWorkshop()
+
         # TODO: from environment variable (implement basic scheduling algorithm)
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
         container: Container = client.containers.run(
-            participant.workshop.docker_tag, auto_remove=True, detach=True,
-            environment={"SSH_PUBLIC_KEY": request.data["public_key"]},
+            workshop.docker_tag, auto_remove=True, detach=True,
+            environment={"SSH_PUBLIC_KEY": request.data["public_key"],
+                         "JUPYTER_TOKEN": secrets.token_bytes(24)},
             publish_all_ports=True,
-            labels={Labels.workshop_id.value: str(participant.workshop.pk),
-                    Labels.user_id.value: str(participant.user.pk),
-                    Labels.participant_id.value: str(participant.pk)},
+            labels={Labels.workshop_id.value: str(workshop.pk),
+                    Labels.user_id.value: str(request.data['user']),
+                    Labels.controller_id.value: 1},
             cpu_period=100000,
             cpu_quota=50000,
             mem_limit="1g")  # type: ignore
@@ -154,11 +172,11 @@ class ContainerViewSet(viewsets.ViewSet):
         client = docker.DockerClient(base_url="ssh://cc@cham-worker2")
         container: Container = client.containers.get(pk)  # type: ignore
         if not (request.user.is_superuser or container.labels[Labels.user_id.value] == str(request.user.pk)):
-            raise PermissionDenied()
+            raise NotAdminOrParticipant()
         container.stop()
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
-    
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """

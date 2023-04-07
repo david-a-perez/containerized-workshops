@@ -7,7 +7,7 @@ CORS_ORIGIN_WHITELIST = [
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '129.114.24.206']
 
 STATIC_URL = "/dj_static/"
 STATIC_ROOT = "/var/www/containerizedworkshops.com/static"

@@ -1,0 +1,38 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Ethan Piper
+
+- hosts: workers
+  gather_facts: no
+  tasks:
+    - name: Install squid
+      ansible.builtin.apt:
+        name:
+          - squid
+        update_cache: yes
+      become: yes
+    
+    - name: Add docker.conf to squid
+      ansible.builtin.copy:
+        src: ../files/docker.conf
+        dest: /etc/squid/conf.d/
+      become: yes
+      register: squid_conf
+
+    - name: Restart squid
+      ansible.builtin.service:
+        name: squid
+        state: restarted
+      become: yes
+      when: squid_conf is changed
+
+    - name: Create .docker directory
+      ansible.builtin.file: 
+        path: .docker
+        state: directory
+
+    - name: Configure Docker to use squid proxy
+      ansible.builtin.copy:
+        src: ../files/config.json
+        dest: .docker/config.json

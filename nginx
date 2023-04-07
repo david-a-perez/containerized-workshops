@@ -4,6 +4,7 @@ error_log /var/log/nginx/containerizedworkshops.error.log info;
 
 server {
     listen 80;
+    server_name containerizedworkshops.com;
 
     location /dj_static/ {
         autoindex on;
@@ -19,7 +20,7 @@ server {
     }
 
     location / {
-        rewrite ^/workshop/(.*)$ / last;
+        rewrite ^/(workshops|workshop/[A-Za-z0-9]*|containers)$ / last;
         autoindex on;
         alias /var/www/containerizedworkshops.com/static/;
     }

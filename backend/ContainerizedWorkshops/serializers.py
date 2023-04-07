@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workshop, Participant
+from .models import Workshop, Snippet, TunneledPort
 from django.contrib.auth.models import User
 
 
@@ -9,6 +9,17 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email')
 
 
+class SnippetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Snippet
+        fields = ('__all__')
+
+class TunneledPortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TunneledPort
+        fields = ('__all__')
+
+
 class WorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop
@@ -16,22 +27,17 @@ class WorkshopSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class ParticipantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Participant
-        fields = ('__all__')
-
-
-class ParticipantReadSerializer(serializers.ModelSerializer):
-    workshop = WorkshopSerializer(read_only=True)
-    user = UserSerializer(read_only=True)
+class WorkshopReadSerializer(serializers.ModelSerializer):
+    snippets = SnippetSerializer(read_only=True, many=True)
+    tunneled_ports = TunneledPortSerializer(read_only=True, many=True)
 
     class Meta:
-        model = Participant
+        model = Workshop
         fields = ('__all__')
+        read_only_fields = ('id',)
 
 
-class PortSerializer(serializers.Serializer):
+class ExposedPortSerializer(serializers.Serializer):
     protocol = serializers.CharField(max_length=5)
     host_port = serializers.IntegerField()
     container_port = serializers.IntegerField(required=False)
@@ -39,9 +45,11 @@ class PortSerializer(serializers.Serializer):
 
 class ContainerSerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)
-    participant = serializers.PrimaryKeyRelatedField(
-        queryset=Participant.objects.all())
+    workshop = serializers.PrimaryKeyRelatedField(
+        queryset=Workshop.objects.all())
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
     public_ip = serializers.IPAddressField(read_only=True)
-    exposed_ports = PortSerializer(read_only=True, many=True)
+    exposed_ports = ExposedPortSerializer(read_only=True, many=True)
     status = serializers.CharField(read_only=True)
     public_key = serializers.CharField()
