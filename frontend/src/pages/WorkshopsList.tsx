@@ -62,11 +62,22 @@ interface WorkshopListProps {
   userData?: UserDataInterface;
 }
 
+export interface WorkshopDict {
+  id: string;
+  participants: number[];
+  title: string;
+  docker_tag: string;
+  description: string;
+  internal_ports: string; // may change to a list of numbers
+}
+
 function WorkshopsList(props: WorkshopListProps) {
+
   const [joinModal, setJoinModal] = useState(false);
   const [userWorkshops, setUserWorkshops] = useState([]);
   const [validated, setValidated] = useState(false);
   const [formCode, setFormCode] = useState("");
+  const [modalSubmitDisable, setModalSubmitDisable] = useState(false);
 
   function joinWorkshopOnClick() {
     setJoinModal(true);
@@ -77,29 +88,55 @@ function WorkshopsList(props: WorkshopListProps) {
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.stopPropagation();
-    } else {
-      // TODO: Change If we need to wait for request
-      setJoinModal(false);
     }
     setValidated(true);
-    console.log(formCode);
+
+    if (form.checkValidity() === true) {
+      console.log(formCode);
+      setModalSubmitDisable(true);
+      JoinNewWorkshop();
+    }
   };
 
+  async function JoinNewWorkshop() {
+    const response = await axios.post("/api/participant/", {
+      user: props.userData?.id,
+      workshop: formCode,
+    });
+
+    setModalSubmitDisable(false);
+
+    if (response.status !== 201) {
+      console.log("Error status:", response.status);
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    setJoinModal(false);
+
+    await fetchData();
+    // maybe handle errors
+  }
+
+  async function fetchData() {
+    if (props.userData?.id === undefined) {
+      return;
+    }
+
+    const response = await axios.get(
+      "/api/workshop/?participants=" + props.userData?.id?.toString()
+    );
+
+    if (response.status !== 200) {
+      console.log("Error status:", response.status);
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    setUserWorkshops(response.data);
+    console.log("FETCH DATA");
+    console.log(response.data);
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.get(
-        "/api/workshop/?participants=" + props.userData?.id?.toString()
-      );
-
-      if (response.status !== 200) {
-        console.log("Error status:", response.status);
-        throw new Error(`Error! status: ${response.status}`);
-      }
-
-      setUserWorkshops(response.data);
-      console.log(response.data);
-    };
-
     fetchData().catch((err) => {
       console.log(err.message);
     });
@@ -129,15 +166,13 @@ function WorkshopsList(props: WorkshopListProps) {
         </Row>
       </Container>
 
-      <Container fluid className={classes.cardContainer}>
+      <Container fluid className={classes.cardContainer} key="3">
         <CardList>
-          {userWorkshops.map(
-            (dict: { ["id"]: string; [key: string]: string | number }) => (
-              <Col>
-                <WorkshopItem workshop={dict}></WorkshopItem>
-              </Col>
-            )
-          )}
+          {userWorkshops.map((dict: WorkshopDict) => (
+            <Col key={dict.id}>
+              <WorkshopItem workshop={dict}></WorkshopItem>
+            </Col>
+          ))}
         </CardList>
       </Container>
 
@@ -173,6 +208,7 @@ function WorkshopsList(props: WorkshopListProps) {
                 variant="primary"
                 type="submit"
                 className={classes.modalJoinButton}
+                disabled={modalSubmitDisable}
               >
                 Submit Code
               </Button>

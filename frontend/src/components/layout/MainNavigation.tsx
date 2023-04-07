@@ -65,7 +65,7 @@ function MainNavigation(props: mainNavProps) {
                 method="post"
               >
                 <CSRFTOKEN csrftoken={props.csrfToken} />
-                <Button variant="outline-success" type="submit">
+                <Button variant="outline-light" type="submit">
                   Sign In
                 </Button>
               </Form>

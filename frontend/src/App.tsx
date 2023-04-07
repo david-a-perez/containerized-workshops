@@ -15,7 +15,7 @@ import axios from "axios";
 import Homepage from './pages/Homepage';
 import WorkshopInfo from './pages/WorkshopInfo';
 
-axios.defaults.xsrfCookieName = "csrfToken";
+axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
 axios.defaults.withCredentials = true;
 
@@ -60,7 +60,7 @@ function App() {
           <Route path="/workshops" element={<WorkshopsList userData={userData}/>} />
           {/* <Route path="/workshop:workshop_id" element={} */}
           <Route path="/test" element={<BasicButton />} />
-          <Route path="/workshop/info/:workshop_id" element={<WorkshopInfo />} />
+          <Route path="/workshop/:workshop_id" element={<WorkshopInfo />} />
         </Routes>
       </Layout>
     </div>
