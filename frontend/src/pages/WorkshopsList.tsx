@@ -7,56 +7,6 @@ import axios from "axios";
 import { UserDataInterface } from "../App";
 import { Form, InputGroup } from "react-bootstrap";
 
-const test_workshop_data = [
-  {
-    id: "1",
-    docker_tag: "Header Text 1",
-    title: "Title Text 1",
-    description: "Body Text 1",
-    internal_ports: "80",
-    participants: [1],
-  },
-  {
-    id: "2",
-    docker_tag: "Header Text 2",
-    title: "Title Text 2",
-    description: "Body Text 2",
-    internal_ports: "80",
-    participants: [2],
-  },
-  {
-    id: "3",
-    docker_tag: "Header Text 3",
-    title: "Title Text 3",
-    description: "Body Text 3",
-    internal_ports: "80",
-    participants: [3],
-  },
-  {
-    id: "4",
-    docker_tag: "Header Text 4",
-    title: "Title Text 4",
-    description: "Body Text 4",
-    internal_ports: "80",
-    participants: [4],
-  },
-  {
-    id: "5",
-    docker_tag: "Header Text 5",
-    title: "Title Text 5",
-    description: "Body Text 5",
-    internal_ports: "80",
-    participants: [5],
-  },
-  {
-    id: "6",
-    docker_tag: "Header Text 6",
-    title: "Title Text 6",
-    description: "Body Text 6",
-    internal_ports: "80",
-    participants: [6],
-  },
-];
 
 interface WorkshopListProps {
   userData?: UserDataInterface;
@@ -99,14 +49,11 @@ function WorkshopsList(props: WorkshopListProps) {
   };
 
   async function JoinNewWorkshop() {
-    const response = await axios.post("/api/participant/", {
-      user: props.userData?.id,
-      workshop: formCode,
-    });
+    const response = await axios.post("/api/workshop/" + formCode + "/join/");
 
     setModalSubmitDisable(false);
 
-    if (response.status !== 201) {
+    if (response.status !== 201 && response.status !== 200) {
       console.log("Error status:", response.status);
       throw new Error(`Error! status: ${response.status}`);
     }
@@ -151,10 +98,10 @@ function WorkshopsList(props: WorkshopListProps) {
 
       <Container>
         <Row>
-          <Col md={10}>
+          <Col>
             <h4>List of Current Workshops:</h4>
           </Col>
-          <Col md={2}>
+          <Col>
             <Button
               variant="dark"
               className={classes.joinWorkshopButton}
