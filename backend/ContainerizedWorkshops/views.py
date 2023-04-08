@@ -1,7 +1,7 @@
 from enum import Enum, unique
 from functools import cached_property
+import functools
 import socket
-from django.shortcuts import render
 import paramiko.ssh_exception
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
@@ -14,7 +14,6 @@ import docker.transport
 from docker.models.containers import Container
 from docker import DockerClient
 import secrets
-import random
 
 from backend.settings.base import CONTROLLER_ID, DOCKER_HOSTS
 from .serializers import WorkshopSerializer, WorkshopReadSerializer, SnippetSerializer, TunneledPortSerializer, ContainerSerializer, UserSerializer
@@ -127,25 +126,136 @@ def serialize_container(client: DockerClient, container: Container):
             "jupyter_token": next(env.split("=", 1)[1] for env in env_vars if env.startswith("JUPYTER_TOKEN="))}
 
 
+
 class CachedDockerClient(DockerClient):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
 
-    @property
-    def api(self):
-        try:
-            return self.__api
-        except socket.error:
-            del self.__api
-            return self.__api
-        except paramiko.ssh_exception.SSHException:
-            del self.__api
-            return self.__api
-
     @cached_property
-    def __api(self):
+    def api(self):
         return docker.APIClient(*self.args, **self.kwargs)
+    
+    @property
+    @functools.wraps(DockerClient.configs.getter)
+    def configs(self):
+        try:
+            return super().configs
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().configs
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().configs
+
+    @property
+    @functools.wraps(DockerClient.containers.getter)
+    def containers(self):
+        try:
+            return super().containers
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().containers
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().containers
+
+    @property
+    @functools.wraps(DockerClient.images.getter)
+    def images(self):
+        try:
+            return super().images
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().images
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().images
+
+    @property
+    @functools.wraps(DockerClient.networks.getter)
+    def networks(self):
+        try:
+            return super().networks
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().networks
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().networks
+
+    @property
+    @functools.wraps(DockerClient.nodes.getter)
+    def nodes(self):
+        try:
+            return super().nodes
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().nodes
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().nodes
+
+    @property
+    @functools.wraps(DockerClient.plugins.getter)
+    def plugins(self):
+        try:
+            return super().plugins
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().plugins
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().plugins
+
+    @property
+    @functools.wraps(DockerClient.secrets.getter)
+    def secrets(self):
+        try:
+            return super().secrets
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().secrets
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().secrets
+
+    @property
+    @functools.wraps(DockerClient.services.getter)
+    def services(self):
+        try:
+            return super().services
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().services
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().services
+
+    @property
+    @functools.wraps(DockerClient.swarm.getter)
+    def swarm(self):
+        try:
+            return super().swarm
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().swarm
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().swarm
+
+    @property
+    @functools.wraps(DockerClient.volumes.getter)
+    def volumes(self):
+        try:
+            return super().volumes
+        except socket.error as e:
+            print("Ignoring error:", e)
+            return super().volumes
+        except paramiko.ssh_exception.SSHException as e:
+            print("Ignoring error:", e)
+            return super().volumes
+
 
 DOCKER_CLIENTS = [CachedDockerClient(base_url=base_url) for base_url in DOCKER_HOSTS]
 
