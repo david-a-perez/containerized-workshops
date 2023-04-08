@@ -45,11 +45,12 @@ class ExposedPortSerializer(serializers.Serializer):
 
 class ContainerSerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)
-    workshop = serializers.PrimaryKeyRelatedField(
+    workshop_id = serializers.PrimaryKeyRelatedField(
         queryset=Workshop.objects.all())
-    user = serializers.PrimaryKeyRelatedField(
+    user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all())
+    status = serializers.CharField(read_only=True)
     public_ip = serializers.IPAddressField(read_only=True)
     exposed_ports = ExposedPortSerializer(read_only=True, many=True)
-    status = serializers.CharField(read_only=True)
     public_key = serializers.CharField()
+    jupyter_token = serializers.CharField(read_only=True)

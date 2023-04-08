@@ -35,7 +35,7 @@ INSTALLED_APPS = [
 
     # CORS
     'corsheaders',
-    
+
     # REST framework
     'rest_framework',
     'django_filters',
@@ -117,12 +117,20 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
+
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
+        "APP": {
+            "client_id": env("OAUTH_CLIENT_ID"),
+            "secret": env("OAUTH_SECRET"),
+            "key": ""
+        },
         'SCOPE': [
             'profile',
             'email',
@@ -134,7 +142,5 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# add environment variables
-env = environ.Env()
-environ.Env.read_env("workers.env")
-DOCKER_HOSTS = [tuple(host.split(";")) for host in env.list("DOCKER_HOSTS")]
+DOCKER_HOSTS: list[str] = env.list("DOCKER_HOSTS")
+CONTROLLER_ID: str = env("CONTROLLER_ID")
