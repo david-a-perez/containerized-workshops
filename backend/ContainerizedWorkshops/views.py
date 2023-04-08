@@ -1,5 +1,8 @@
 from enum import Enum, unique
+from functools import cached_property
+import socket
 from django.shortcuts import render
+import paramiko.ssh_exception
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -124,7 +127,27 @@ def serialize_container(client: DockerClient, container: Container):
             "jupyter_token": next(env.split("=", 1)[1] for env in env_vars if env.startswith("JUPYTER_TOKEN="))}
 
 
-DOCKER_CLIENTS = [DockerClient(base_url=base_url) for base_url in DOCKER_HOSTS]
+class CachedDockerClient(DockerClient):
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+    @property
+    def api(self):
+        try:
+            return self.__api
+        except socket.error:
+            del self.__api
+            return self.__api
+        except paramiko.ssh_exception.SSHException:
+            del self.__api
+            return self.__api
+
+    @cached_property
+    def __api(self):
+        return docker.APIClient(*self.args, **self.kwargs)
+
+DOCKER_CLIENTS = [CachedDockerClient(base_url=base_url) for base_url in DOCKER_HOSTS]
 
 
 class ContainerViewSet(viewsets.ViewSet):
