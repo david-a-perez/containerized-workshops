@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib import admin
+
+from ContainerizedWorkshops.container import clear_containers
 from .models import Workshop, Snippet, TunneledPort
 
 # Register your models here.
@@ -13,8 +15,7 @@ class WorkshopAdmin(admin.ModelAdmin):
 
     def remove_containers(self, request, queryset):
         for workshop in queryset:
-            # TODO: remove all containers that belong to workshop
-            pass
+            clear_containers(workshop.pk, None)
 
     remove_containers.short_description = "Remove all containers from selected workshops"
 
@@ -40,8 +41,7 @@ class UserAdmin(AuthUserAdmin):
 
     def remove_containers(self, request, queryset):
         for user in queryset:
-            # TODO: remove all containers that belong to user
-            pass
+            clear_containers(None, str(user.pk))
 
     activate_user.short_description = "Activate selected users"
     deactivate_user.short_description = "Deactivate selected users"
