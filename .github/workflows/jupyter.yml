@@ -2,8 +2,8 @@ name: jupyter-base
 
 on:
   push:
-    branches:
-      - "main"
+    paths:
+      - ./example-workshops/jupyter
 
 jobs:
   build:
