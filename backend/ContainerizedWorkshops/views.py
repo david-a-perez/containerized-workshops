@@ -1,3 +1,8 @@
+<<<<<<< Updated upstream
+=======
+from enum import Enum, unique
+from django.shortcuts import render
+>>>>>>> Stashed changes
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -119,6 +124,12 @@ def serialize_container(container: Container):
             "jupyter_token": next(env.split("=", 1)[1] for env in env_vars if env.startswith("JUPYTER_TOKEN="))}
 
 
+<<<<<<< Updated upstream
+=======
+DOCKER_CLIENTS = [DockerClient(base_url=base_url) for base_url in DOCKER_HOSTS]
+
+
+>>>>>>> Stashed changes
 class ContainerViewSet(viewsets.ViewSet):
     serializer_class = ContainerSerializer
     permission_classes = [permissions.IsAuthenticated]

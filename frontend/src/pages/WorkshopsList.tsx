@@ -62,6 +62,7 @@ function WorkshopsList(props: WorkshopListProps) {
 
     await fetchData();
     // maybe handle errors
+    // TODO: maybe navigate to workshop itself
   }
 
   async function fetchData() {

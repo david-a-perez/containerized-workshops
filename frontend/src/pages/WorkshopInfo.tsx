@@ -10,6 +10,8 @@ import { Button } from "react-bootstrap";
 import { UserDataInterface } from "../App";
 import { string } from "prop-types";
 
+import { generateKeyPair } from "web-ssh-keygen";
+
 /**
  * Steps:
  * 1) Get Info about workshop
@@ -17,12 +19,12 @@ import { string } from "prop-types";
  * 3) Start/Stop a container
  * 	Start:
  * 		1) Generate ssh key
- * 		2) Send an API request w/ public key
+ * 		2) Send an API request w/ public key to create the container
  * 		3) delay
  * 		4) Get the port number by re-requesting
  * 		5) Generate Commands
  * 			- automatically ssh
- * 			- ssh tunneling
+ * 			- ssh tunneling (not a snippet) ssh -L client_port:localhost:container_port -- in workshop model
  * 			- copy stuff out of container
  *		6) Download zip file (also need to zip the files)
  *			- private key (maybe also public key)
@@ -39,7 +41,7 @@ interface SnippetDict {
 interface TunneledPortsDict {
   id: Number;
   title: string;
-  continer_port: Number;
+  container_port: Number;
   client_port: Number;
 }
 
@@ -80,6 +82,8 @@ function WorkshopInfo(props: WorkshopInfoProps) {
   const [container, setContainer] = useState<ContainerVerbose>();
   const [containerCreated, setContainerCreated] = useState(false);
 
+  const containerCreateSleep: number = 1000;
+
   let { workshop_id } = useParams();
 
   async function fetchWorkshopData() {
@@ -113,12 +117,13 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       throw new Error(`Error! status: ${response.status}`);
     }
 
-    if (response.data.size !== 0) {
+    if (response.data.length !== 0) {
       setContainer(response.data[0]);
       setContainerCreated(true);
     }
-
-    setContainerCreated(false);
+    else {
+      setContainerCreated(false);
+    }
   }
 
   useEffect(() => {
@@ -133,7 +138,44 @@ function WorkshopInfo(props: WorkshopInfoProps) {
     });
   }, [workshop?.id]);
 
-  function createContainer() {}
+  async function createContainer() {
+    if (props.userData?.id == undefined) {
+      console.log("User Id is undefined in generate Keys");
+    }
+
+    const { privateKey, publicKey } = await generateKeyPair({
+      alg: "RSASSA-PKCS1-v1_5",
+      size: 4096,
+      hash: "SHA-512",
+      name: "",
+    });
+
+    const response = await axios.post("/api/containers/", {
+      public_key: publicKey,
+      user_id: props.userData?.id,
+      workshop_id: workshop?.id,
+    });
+
+    if (response.status !== 200){
+      console.log("Create Container Error status:", response.status);
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    await new Promise(f => setTimeout(f, containerCreateSleep));
+
+    await fetchContainerData();
+
+    exportPrivateKey(privateKey);
+  }
+
+  function exportPrivateKey(privateKey: string) {
+    const blob = new Blob([privateKey], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = "user-info.pem";
+    link.href = url;
+    link.click();
+  }
 
   return (
     <Container>
@@ -141,14 +183,14 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       <h4>Docker tag: {workshop?.docker_tag}</h4>
       <p>Description: {workshop?.description}</p>
       {!containerCreated ? (
-        <Button variant="outline-light" className={classes.createButton}>
+        <Button variant="outline-light" className={classes.createButton} onClick={createContainer}>
           Create Container
         </Button>
       ) : (
         <></>
       )}
 
-      
+      <Button variant="outline-dark" onClick={() => exportPrivateKey("kshkjhjkfdhjkh")}>Test Button</Button>
     </Container>
   );
 }

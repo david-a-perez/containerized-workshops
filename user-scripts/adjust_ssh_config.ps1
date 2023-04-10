@@ -20,9 +20,12 @@ if (!((test-path -PathType leaf "~/.ssh/config") -and (Select-String -Path "~/.s
     Add-Content -Path "~/.ssh/config" -Value "  User $WorkshopUser"
     Add-Content -Path "~/.ssh/config" -Value "  Port $Port"
 }
-
+ 
 Copy-Item "$HostName-workshop.pem" -Destination "$HOME\.ssh\"
 
-ssh "$HostName-workshop" -- echo "ssh is working"
+# ssh "$HostName-workshop" -- echo "ssh is working"
+
+# Vscode snippet for windows
+
 code --install-extension ms-vscode-remote.remote-ssh
 code --remote "ssh-remote+$HostName-workshop" "/$WorkshopUser/workshop/"
