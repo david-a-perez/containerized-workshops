@@ -1,14 +1,14 @@
 server_tokens off;
-access_log /var/log/nginx/containerizedworkshops.access.log;
-error_log /var/log/nginx/containerizedworkshops.error.log info;
+access_log /var/log/nginx/cloudworkshops.access.log;
+error_log /var/log/nginx/cloudworkshops.error.log info;
 
 server {
     listen 80;
-    server_name containerizedworkshops.com;
+    server_name cloudworkshops.dev;
 
     location /dj_static/ {
         autoindex on;
-        alias /var/www/containerizedworkshops.com/static/;
+        alias /var/www/cloudworkshops.dev/static/;
     }
 
     location ~ ^/(admin|accounts|api-auth|api)/ {
@@ -22,6 +22,6 @@ server {
     location / {
         rewrite ^/(workshops|workshop/[A-Za-z0-9]*|containers)$ / last;
         autoindex on;
-        alias /var/www/containerizedworkshops.com/static/;
+        alias /var/www/cloudworkshops.dev/static/;
     }
 }

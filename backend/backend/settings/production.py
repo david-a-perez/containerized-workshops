@@ -1,16 +1,14 @@
 from .base import *
 
-CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
-]
+CORS_ORIGIN_WHITELIST = []
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '129.114.24.206']
+ALLOWED_HOSTS = ['localhost', 'cloudworkshops.dev']
 
 STATIC_URL = "/dj_static/"
-STATIC_ROOT = "/var/www/containerizedworkshops.com/static"
+STATIC_ROOT = "/var/www/cloudworkshops.dev/static"
 STATICFILES_DIRS = [ BASE_DIR /  "../frontend/build"]
 
 # Database

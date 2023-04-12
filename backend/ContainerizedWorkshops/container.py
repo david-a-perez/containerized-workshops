@@ -149,9 +149,9 @@ DOCKER_CLIENTS = [CachedDockerClient(base_url=base_url)
 
 @unique
 class Labels(str, Enum):
-    workshop_id = 'com.containerized-workshops.workshop-id'
-    user_id = 'com.containerized-workshops.user-id'
-    controller_id = 'com.containerized-workshops.controller-id'
+    workshop_id = 'dev.cloudworkshops.workshop-id'
+    user_id = 'dev.cloudworkshops.user-id'
+    controller_id = 'dev.cloudworkshops.controller-id'
 
 
 def list_containers(workshop_id: str | None, user_id: str | None) -> list[Container]:
