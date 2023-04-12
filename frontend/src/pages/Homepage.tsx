@@ -1,6 +1,6 @@
 import classes from "./Homepage.module.css";
 import { Container, Image, Row, Col } from "react-bootstrap";
-import image_path from "../resources/MainImage.png";
+import image_path from "../resources/images/MainImage.png";
 
 function Homepage() {
   return (

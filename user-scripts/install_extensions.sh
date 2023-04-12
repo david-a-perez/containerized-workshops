@@ -1,4 +1,5 @@
 #!/bin/bash
+# Vscode snippet for OSX
 
 WORKSHOP_NAME="data-science"
 WORKSHOP_USER="root"
