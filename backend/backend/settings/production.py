@@ -5,6 +5,9 @@ CORS_ORIGIN_WHITELIST = []
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env("SECRET_KEY")
+
 ALLOWED_HOSTS = ['localhost', 'cloudworkshops.dev']
 
 STATIC_URL = "/dj_static/"

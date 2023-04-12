@@ -7,6 +7,9 @@ CORS_ORIGIN_WHITELIST = [
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-j8$(6rrh6o*psdda(21-hpqqq#x3a3zp@26n4q_b1)h$icgtw+'
+
 ALLOWED_HOSTS = []
 
 # Database
