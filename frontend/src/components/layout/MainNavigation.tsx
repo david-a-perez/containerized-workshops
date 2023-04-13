@@ -41,13 +41,13 @@ function MainNavigation(props: mainNavProps) {
             ) : (
               <></>
             )}
-            {props.userData?.is_admin ? (
+            {/* {props.userData?.is_admin ? (
               <Nav.Link as={Link} to={"/test"}>
                 Container List
               </Nav.Link>
             ) : (
               <></>
-            )}
+            )} */}
 
             {props.userData?.is_admin ? (
               <Nav.Link as={Link} to={"/"}>

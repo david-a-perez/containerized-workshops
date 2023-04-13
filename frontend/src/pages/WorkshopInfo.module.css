@@ -1,3 +1,7 @@
 .createButton {
-	float: right;
+	float: left;
+}
+
+.deteleButton {
+	float: left;
 }

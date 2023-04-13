@@ -19,6 +19,9 @@ import adjust_ssh_powershell from "../resources/scripts/adjust_ssh_config.ps1";
 import adjust_ssh_bash from "../resources/scripts/adjust_ssh_config.sh";
 import copy_files_out_bash from "../resources/scripts/copy_files_out.sh";
 
+import bash_snippet_file from "../resources/scripts/snippet.sh";
+import powershell_snippet_file from "../resources/scripts/snippet.ps1";
+
 import text_file from "../resources/test.txt";
 
 import { renderFile, render } from "template-file";
@@ -47,7 +50,8 @@ import { ExportDeclaration } from "typescript";
 interface SnippetDict {
   id: Number;
   title: string;
-  format: string;
+  bash_commands: string;
+  powershell_commands: string;
 }
 
 interface TunneledPortsDict {
@@ -96,8 +100,11 @@ function WorkshopInfo(props: WorkshopInfoProps) {
   const [containerCreateButtonDisable, setContainerCreateButtonDisable] =
     useState(false);
   const [privKey, setPrivKey] = useState("");
+  const [activatePage, setActivatePage] = useState(false);
+  const [deleteContainerButtonDisable, setDeleteContainerButtonDisable] =
+    useState(false);
 
-  const containerCreateSleep: number = 2000;
+  const containerCreateSleep: number = 1000;
 
   let { workshop_id } = useParams();
 
@@ -116,6 +123,52 @@ function WorkshopInfo(props: WorkshopInfoProps) {
     setWorkshop(response.data);
   }
 
+  async function fetchNewContainerData() {
+    if (workshop === undefined) {
+      return;
+    }
+    const response = await axios.get("/api/containers/", {
+      params: {
+        workshop_id: workshop?.id,
+        user_id: props.userData?.id,
+      },
+    });
+
+    if (response.status !== 200) {
+      console.log("Error status:", response.status);
+      setContainerCreateButtonDisable(false);
+      setDeleteContainerButtonDisable(false);
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    return response;
+  }
+
+  async function waitForNewContainer() {
+    const timeout = 10;
+    let count = 1;
+
+    let response = await fetchNewContainerData();
+
+    while (response?.data.length === 0 && count < timeout) {
+      await new Promise((f) => setTimeout(f, containerCreateSleep));
+      response = await fetchNewContainerData();
+      ++count;
+    }
+
+    if (count === timeout) {
+      setContainerCreated(false);
+      setContainerCreateButtonDisable(false);
+      setDeleteContainerButtonDisable(false);
+      throw new Error(`Error! fetching new container timed out`);
+    }
+
+    setContainer(response?.data[0]);
+    setContainerCreated(true);
+
+    return response?.data[0];
+  }
+
   async function fetchContainerData() {
     if (workshop === undefined) {
       return;
@@ -129,6 +182,8 @@ function WorkshopInfo(props: WorkshopInfoProps) {
 
     if (response.status !== 200) {
       console.log("Error status:", response.status);
+      setContainerCreateButtonDisable(false);
+      setDeleteContainerButtonDisable(false);
       throw new Error(`Error! status: ${response.status}`);
     }
 
@@ -139,7 +194,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       setContainerCreated(false);
     }
 
-    setContainerCreateButtonDisable(false);
+    setActivatePage(true);
   }
 
   useEffect(() => {
@@ -154,13 +209,24 @@ function WorkshopInfo(props: WorkshopInfoProps) {
     });
   }, [workshop?.id]);
 
+  /***
+   * Create a Container
+   *
+   */
   async function createContainer() {
-    if (props.userData?.id == undefined) {
+    if (props.userData?.id === undefined) {
       console.log("User Id is undefined in generate Keys");
+      return;
+    }
+
+    if (workshop == undefined) {
+      console.log("Workshop is undefined");
+      return;
     }
 
     setContainerCreateButtonDisable(true);
 
+    // create the public and private key
     const { privateKey, publicKey } = await generateKeyPair({
       alg: "RSASSA-PKCS1-v1_5",
       size: 4096,
@@ -168,6 +234,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       name: "",
     });
 
+    // send the request to the container
     const response = await axios.post("/api/containers/", {
       public_key: publicKey,
       user_id: props.userData?.id,
@@ -182,82 +249,212 @@ function WorkshopInfo(props: WorkshopInfoProps) {
 
     setPrivKey(privateKey);
 
-    await new Promise((f) => setTimeout(f, containerCreateSleep));
+    const cur_container: ContainerVerbose = await waitForNewContainer();
 
-    await fetchContainerData();
-  }
-
-  async function test_save_file() {
+    // create the stuff to zip it all.
     let zip = new JSZip();
-    //let test_folder = zip.folder(`test_folder`);
+    //let test_folder = zip.folder(`commands`);
 
-    let privKeyFile = new Blob([privKey], { type: "text/plain" });
+    let privKeyFile = new Blob([privateKey], { type: "text/plain" });
 
     // set the data for the workshop
     const host_name = workshop?.title.replaceAll(" ", "_") + "-" + workshop?.id;
 
     // map the exposed ports in the container to their host port
     const exposed_ports_dict: { [key: string]: Number } = {};
-    container?.exposed_ports.forEach((value : ExposedPort) => {
+    cur_container.exposed_ports.forEach((value: ExposedPort) => {
       exposed_ports_dict[value.container_port.toString()] = value.host_port;
     });
 
     // map the tunneled ports in the container to their host port
-    const tunneled_ports_dict: {[key: string]: Number } = {};
+    const tunneled_ports_dict: { [key: string]: Number } = {};
+
+    // add the tunneling file if applicable
+    let tunnel_commands = "ssh " + host_name + "-workshop -N ";
+    let tunneled = false;
     workshop?.tunneled_ports.forEach((value: TunneledPortsDict) => {
+      tunnel_commands += `-L ${value.client_port}:localhost:${value.container_port} `;
       tunneled_ports_dict[value.container_port.toString()] = value.client_port;
+      tunneled = true;
     });
 
     // the replace data for the files
     const data = {
       host: {
         name: host_name,
-        ip: "129.114.25.151",
+        ip: cur_container.public_ip,
+        directory: workshop?.working_directory,
       },
-      WorkshopPort: "32778",
       exposedPort: exposed_ports_dict,
       tunneledPort: tunneled_ports_dict,
+      jupyter_token: cur_container.jupyter_token,
     };
-
-    //console.log(data);
 
     // create the private key file
     zip.file(host_name + "-workshop.pem", privKeyFile);
 
     // create the command files
-    zip.file("adjust_ssh_config.ps1", await format_file(adjust_ssh_powershell, data));
+    zip.file(
+      "adjust_ssh_config.ps1",
+      await format_file(adjust_ssh_powershell, data)
+    );
     zip.file("adjust_ssh_config.sh", await format_file(adjust_ssh_bash, data));
     zip.file("copy_files_out.sh", await format_file(copy_files_out_bash, data));
 
-    // create the snippet files
-    workshop?.snippets.forEach((value : SnippetDict) => {
-      zip.file(value.title.replaceAll(" ", "_"), format_string(value.format, data));
-    });
+    if (tunneled) {
+      const snippet_data = {
+        snippet: {
+          title: "Tunnel Ports",
+          bash_commands: tunnel_commands,
+          powershell_commands: tunnel_commands,
+        },
+      };
+
+      const tunnel_bash = await get_snippet_string(
+        bash_snippet_file,
+        snippet_data
+      );
+
+      const tunnel_powershell = await get_snippet_string(
+        powershell_snippet_file,
+        snippet_data
+      );
+
+      // powershell command
+      zip.file(
+        "tunnel_ports.sh",
+        format_string(tunnel_bash, data)
+      );
+
+      // bash command
+      zip.file(
+        "tunnel_ports.ps1",
+        format_string(tunnel_powershell, data)
+      );
+    }
+
+    // determine number of snippets
+    let snip_num = 0;
+    if (workshop?.snippets !== undefined) {
+      snip_num = workshop.snippets.length;
+    }
+
+    // create the snippets
+    for (let i = 0; i < snip_num; i++) {
+      let value = workshop?.snippets[i];
+
+      const snippet_data = {
+        snippet: {
+          title: value?.title,
+          bash_commands: value?.bash_commands,
+          powershell_commands: value?.powershell_commands,
+        },
+      };
+
+      const bash_snippet = await get_snippet_string(
+        bash_snippet_file,
+        snippet_data
+      );
+      const powershell_snippet = await get_snippet_string(
+        powershell_snippet_file,
+        snippet_data
+      );
+
+      // powershell command
+      zip.file(
+        value?.title.replaceAll(" ", "_") + ".ps1",
+        format_string(powershell_snippet, data)
+      );
+
+      // bash command
+      zip.file(
+        value?.title.replaceAll(" ", "_") + ".sh",
+        format_string(bash_snippet, data)
+      );
+    }
 
     // create and download the zip folder
     zip.generateAsync({ type: "blob" }).then((content) => {
       saveAs(content, host_name + ".zip");
     });
+
+    setContainerCreateButtonDisable(false);
   }
 
-  async function format_file(file_name : string, format_data: any) : Promise<Blob>{
+  async function format_file(
+    file_name: string,
+    format_data: any
+  ): Promise<Blob> {
     const new_file = fetch(file_name)
-    .then((r) => r.text())
-    .then((text) => render(text, format_data)
-    ).then((rendered) => {
-      let formatted_file = new Blob([rendered], { type: "text/plain" });
-      return formatted_file;
-    });
+      .then((r) => r.text())
+      .then((text) => render(text, format_data))
+      .then((rendered) => {
+        let formatted_file = new Blob([rendered], { type: "text/plain" });
+        return formatted_file;
+      });
 
     return new_file;
   }
 
-  function format_string(command : string, format_data : any) : Blob {
+  async function get_snippet_string(
+    file_name: string,
+    format_data: any
+  ): Promise<string> {
+    const file_string = fetch(file_name)
+      .then((r) => r.text())
+      .then((text) => {
+        return render(text, format_data);
+      });
+
+    return file_string;
+  }
+
+  function format_string(command: string, format_data: any): Blob {
     return new Blob([render(command, format_data)], { type: "text/plain" });
   }
 
-  async function test_func() {
-    console.log(container);
+  async function deleteContainer() {
+    setDeleteContainerButtonDisable(true);
+
+    const response = await axios.post("/api/containers/clear/", {
+      user_id: props.userData?.id,
+      workshop_id: workshop?.id,
+    });
+
+    if (response.status !== 200) {
+      console.log("Create Deleting Container:", response.status);
+      setDeleteContainerButtonDisable(false);
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    await fetchContainerData();
+
+    setDeleteContainerButtonDisable(false);
+  }
+
+  function display_buttons() {
+    return (
+      <div>
+        {!containerCreated ? (
+          <Button
+            variant="outline-light"
+            className={classes.createButton}
+            disabled={containerCreateButtonDisable}
+            onClick={createContainer}
+          >
+            Create Container
+          </Button>
+        ) : (
+          <Button
+            variant="dark"
+            onClick={deleteContainer}
+            disabled={deleteContainerButtonDisable}
+          >
+            Delete Container
+          </Button>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -265,21 +462,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       <h1>Info for {workshop?.title}</h1>
       <h4>Docker tag: {workshop?.docker_tag}</h4>
       <p>Description: {workshop?.description}</p>
-      {!containerCreated ? (
-        <Button
-          variant="outline-light"
-          className={classes.createButton}
-          disabled={containerCreateButtonDisable}
-          onClick={createContainer}
-        >
-          Create Container
-        </Button>
-      ) : (
-        <Button variant="dark" onClick={test_save_file}>
-        Download Files
-      </Button>
-      )}
-
+      {activatePage ? display_buttons() : <></>}
     </Container>
   );
 }

@@ -16,7 +16,8 @@ def create_new_id():
 
 class Snippet(models.Model):
     title = models.CharField(max_length=120)
-    format = models.TextField()
+    bash_commands = models.TextField()
+    powershell_commands = models.TextField()
 
     def __str__(self):
         return self.title
