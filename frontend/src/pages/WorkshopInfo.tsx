@@ -22,10 +22,7 @@ import copy_files_out_bash from "../resources/scripts/copy_files_out.sh";
 import bash_snippet_file from "../resources/scripts/snippet.sh";
 import powershell_snippet_file from "../resources/scripts/snippet.ps1";
 
-import text_file from "../resources/test.txt";
-
 import { renderFile, render } from "template-file";
-import { ExportDeclaration } from "typescript";
 
 /**
  * Steps:

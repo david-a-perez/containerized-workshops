@@ -80,8 +80,6 @@ function WorkshopsList(props: WorkshopListProps) {
     }
 
     setUserWorkshops(response.data);
-    console.log("FETCH DATA");
-    console.log(response.data);
   }
 
   useEffect(() => {
