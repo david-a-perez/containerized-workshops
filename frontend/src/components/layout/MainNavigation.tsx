@@ -50,7 +50,7 @@ function MainNavigation(props: mainNavProps) {
             )} */}
 
             {props.userData?.is_admin ? (
-              <Nav.Link as={Link} to={"/"}>
+              <Nav.Link href="http://localhost:8000/admin/">
                 Django Admin Page
               </Nav.Link>
             ) : (
