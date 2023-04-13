@@ -25,4 +25,4 @@ if [[ -v SSH_PUBLIC_KEY ]]; then
     echo $SSH_PUBLIC_KEY >> ~/.ssh/authorized_keys
 fi
 
-exec /usr/sbin/sshd -D
+/usr/sbin/sshd -D
