@@ -2,8 +2,8 @@ name: vscode-base
 
 on:
   push:
-    branches:
-      - ./example-workshops/vscode
+    paths:
+      - example-workshops/vscode/**
 
 jobs:
   build:

@@ -3,7 +3,7 @@ name: jupyter-base
 on:
   push:
     paths:
-      - ./example-workshops/jupyter
+      - example-workshops/jupyter/**
 
 jobs:
   build:

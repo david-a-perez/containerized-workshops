@@ -318,16 +318,10 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       );
 
       // powershell command
-      zip.file(
-        "tunnel_ports.sh",
-        format_string(tunnel_bash, data)
-      );
+      zip.file("tunnel_ports.sh", format_string(tunnel_bash, data));
 
       // bash command
-      zip.file(
-        "tunnel_ports.ps1",
-        format_string(tunnel_powershell, data)
-      );
+      zip.file("tunnel_ports.ps1", format_string(tunnel_powershell, data));
     }
 
     // determine number of snippets
