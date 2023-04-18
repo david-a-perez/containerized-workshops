@@ -3,7 +3,7 @@ name: vscode-base
 on:
   push:
     paths:
-      - example-workshops/vscode/**
+      - example-workshops/vscode-base/**
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./example-workshops/vscode
-          file: ./example-workshops/vscode/Dockerfile
+          context: ./example-workshops/vscode-base
+          file: ./example-workshops/vscode-base/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/vscode-base:latest

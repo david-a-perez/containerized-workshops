@@ -3,7 +3,7 @@ name: jupyter-base
 on:
   push:
     paths:
-      - example-workshops/jupyter/**
+      - example-workshops/jupyter-base/**
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./example-workshops/jupyter
-          file: ./example-workshops/jupyter/Dockerfile
+          context: ./example-workshops/jupyter-base
+          file: ./example-workshops/jupyter-base/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/jupyter-base:latest
