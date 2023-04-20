@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import logo from './logo.svg';
 import './App.css';
-import BasicButton from './components/BasicButton';
 import WorkshopsList from './pages/WorkshopsList';
 import Layout from './components/layout/Layout';
 
@@ -58,8 +57,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/workshops" element={<WorkshopsList userData={userData}/>} />
-          {/* <Route path="/workshop:workshop_id" element={} */}
-          {/* <Route path="/test" element={<BasicButton />} /> */}
           <Route path="/workshop/:workshop_id" element={<WorkshopInfo userData={userData}/>} />
         </Routes>
       </Layout>
