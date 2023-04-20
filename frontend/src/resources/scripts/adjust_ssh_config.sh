@@ -27,4 +27,4 @@ fi
 cp "$WORKSHOP_NAME-workshop.pem" "$KEY"
 chmod 600 "$KEY"
 
-ssh "$HostName-workshop" -- echo "ssh is working"
+ssh "$WORKSHOP_NAME-workshop" -- echo "ssh is working"
