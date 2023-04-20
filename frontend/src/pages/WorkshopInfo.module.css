@@ -1,7 +1,76 @@
 .createButton {
-	float: left;
+	
 }
 
 .deteleButton {
-	float: left;
+}
+
+.workshopLink {
+	color: inherit;
+}
+
+.workshopLink:hover {
+	color: #39b5e8;
+}
+
+.mainContainer {
+	text-align: center;
+	min-height: 100%;
+	padding-top: 15rem;
+	padding-left: 17%;
+	padding-right: 17%;
+	padding-bottom: 15rem;
+}
+
+.mainContainerDiv {
+	border-bottom: 2px solid black;
+}
+
+.workshopTitle {
+	padding: 1rem;
+}
+
+.workshopDesc{
+	text-align: left;
+}
+
+.workshopInstructionsTitle {
+	text-align: left;
+}
+
+.image_1{
+	max-width: 50%;
+	max-height: 50%;
+	padding-bottom: 1%;
+}
+
+
+.worskopInstructions {
+
+	/* ff 3.6+ */
+	background:-moz-linear-gradient(90deg, rgba(13, 200, 237, 1) 0%, rgba(13, 183, 237, 1) 100%); 
+
+	/* safari 5.1+,chrome 10+ */
+	background:-webkit-linear-gradient(90deg, rgba(13, 200, 237, 1) 0%, rgba(13, 183, 237, 1) 100%);
+
+	/* opera 11.10+ */
+	background:-o-linear-gradient(90deg, rgba(13, 200, 237, 1) 0%, rgba(13, 183, 237, 1) 100%);
+
+	/* ie 6-9 */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0DB7ED', endColorstr='#0DC8ED', GradientType=0 );
+
+	/* ie 10+ */
+	background:-ms-linear-gradient(90deg, rgba(13, 200, 237, 1) 0%, rgba(13, 183, 237, 1) 100%);
+
+	/* global 94%+ browsers support */
+	background:linear-gradient(90deg, rgba(13, 200, 237, 1) 0%, rgba(13, 183, 237, 1) 100%);
+
+	padding-top: 1rem;
+
+	padding-bottom: 3rem;
+
+}
+
+.lastPara{
+	margin: 0;
 }

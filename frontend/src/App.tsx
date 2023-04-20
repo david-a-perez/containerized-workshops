@@ -59,7 +59,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/workshops" element={<WorkshopsList userData={userData}/>} />
           {/* <Route path="/workshop:workshop_id" element={} */}
-          <Route path="/test" element={<BasicButton />} />
+          {/* <Route path="/test" element={<BasicButton />} /> */}
           <Route path="/workshop/:workshop_id" element={<WorkshopInfo userData={userData}/>} />
         </Routes>
       </Layout>

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Vscode snippet for OSX
 
-WORKSHOP_NAME="data-science"
+WORKSHOP_NAME="{{ host.name }}"
 WORKSHOP_DIR="{{ host.directory }}"
 
 code --install-extension ms-vscode-remote.remote-ssh

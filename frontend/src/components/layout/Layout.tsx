@@ -14,7 +14,7 @@ interface PropType{
 
 function Layout(props : PropType) {
   return (
-    <div>
+    <div className={classes.gradient__bg}>
       <MainNavigation csrfToken={props.csrfToken} userData={props.userData} />
       <main className={classes.main}>{props.children}</main>
     </div>

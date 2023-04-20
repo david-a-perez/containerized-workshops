@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-import { Button } from "react-bootstrap";
+import { Button, Image } from "react-bootstrap";
 import { UserDataInterface } from "../App";
 import { string } from "prop-types";
 
@@ -23,6 +23,8 @@ import bash_snippet_file from "../resources/scripts/snippet.sh";
 import powershell_snippet_file from "../resources/scripts/snippet.ps1";
 
 import { renderFile, render } from "template-file";
+
+import instruct_image_1 from "../resources/images/ZipFile.png";
 
 /**
  * Steps:
@@ -428,7 +430,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       <div>
         {!containerCreated ? (
           <Button
-            variant="outline-light"
+            variant="outline-light btn-lg"
             className={classes.createButton}
             disabled={containerCreateButtonDisable}
             onClick={createContainer}
@@ -437,7 +439,8 @@ function WorkshopInfo(props: WorkshopInfoProps) {
           </Button>
         ) : (
           <Button
-            variant="dark"
+            variant="dark btn-lg"
+            className={classes.deleteButton}
             onClick={deleteContainer}
             disabled={deleteContainerButtonDisable}
           >
@@ -449,12 +452,56 @@ function WorkshopInfo(props: WorkshopInfoProps) {
   }
 
   return (
-    <Container>
-      <h1>Info for {workshop?.title}</h1>
-      <h4>Docker tag: {workshop?.docker_tag}</h4>
-      <p>Description: {workshop?.description}</p>
-      {activatePage ? display_buttons() : <></>}
-    </Container>
+    <div>
+      <div className={classes.mainContainerDiv}>
+        <Container className={classes.mainContainer}>
+          <h1 className={classes.workshopTitle}>
+            "{workshop?.title}" Workshop
+          </h1>
+          <Row>{activatePage ? display_buttons() : <></>}</Row>
+        </Container>
+      </div>
+      <div className={classes.worskopInstructions}>
+        <Container>
+          <h3>
+            {" "}
+            <a
+              className={classes.workshopLink}
+              href={"https://hub.docker.com/r/" + workshop?.docker_tag}
+            >
+              Link to Docker Container
+            </a>
+          </h3>
+          <p className={classes.workshopDesc}>{workshop?.description}</p>
+
+          <h3>Instructions:</h3>
+          <p>
+            Start by clicking on the <b>Create Container</b> Button.{" "}
+          </p>
+          <p>
+            After a few seconds, a zip file will be downloaded. Please unzip
+            that file into a easy to access folder. You should see similar files as below:
+          </p>
+          <Image
+            fluid
+            src={instruct_image_1}
+            className={classes.image_1}
+          ></Image>
+          <p>
+            If you are on windows, from now one only use the <b>.ps1</b> files.
+            If you are on Mac or Linux, use the <b>.sh</b> files.
+          </p>
+          <p>First, run the adjust_ssh_config file</p>
+          <p>
+            Second, run any "snippet" files that the workshop leader created.
+          </p>
+          <p className={classes.lastPara}>
+            At the end of the workshop, you may run the copy_files_out scipt to
+            save any work to your computer.
+          </p>
+        </Container>
+      </div>
+    </div>
   );
 }
 

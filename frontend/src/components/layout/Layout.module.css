@@ -1,8 +1,37 @@
-.main{
-	margin: 0px;
-	width: 100%;
-	/* background-color: #384d54; */
-	background-color: #5764a3;
-	height: 100vh;
-	width: 100vw;
+.main {
+  margin: 0px;
+  width: 100%;
+  /* background-color: #384d54; */
+  /* background-color: #5764a3; */
+  /* height: 100vh; */
+	min-height: 100vh;
+  width: auto;
+	overflow-x: hidden;
+}
+
+.mainDiv {
+  background-color: #5764a3;
+	overflow-x: hidden;
+}
+
+.gradient__bg {
+
+	/* ff 3.6+ */
+	background:-moz-linear-gradient(90deg, rgba(103, 117, 187, 1) 0%, rgba(61, 71, 120, 1) 100%); 
+
+	/* safari 5.1+,chrome 10+ */
+	background:-webkit-linear-gradient(90deg, rgba(103, 117, 187, 1) 0%, rgba(61, 71, 120, 1) 100%);
+
+	/* opera 11.10+ */
+	background:-o-linear-gradient(90deg, rgba(103, 117, 187, 1) 0%, rgba(61, 71, 120, 1) 100%);
+
+	/* ie 6-9 */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3D4778', endColorstr='#6775BB', GradientType=0 );
+
+	/* ie 10+ */
+	background:-ms-linear-gradient(90deg, rgba(103, 117, 187, 1) 0%, rgba(61, 71, 120, 1) 100%);
+
+	/* global 94%+ browsers support */
+	background:linear-gradient(90deg, rgba(103, 117, 187, 1) 0%, rgba(61, 71, 120, 1) 100%);
+
 }

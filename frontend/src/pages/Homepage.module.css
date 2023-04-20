@@ -1,9 +1,34 @@
 .mainImage{
 	max-width: 100%;
 	max-height: 100%;
+	padding-top: 5%;
 }
 
 .mainContainer{
 	padding: 3%;
 	padding-top: 1%;
+}
+
+.aboutText {
+	text-align: center;
+	padding-right: 5%;
+	padding-left: 5%;
+}
+
+.aboutCard{
+	background: inherit;
+	margin-left: 10%;
+	margin-right: 10%;
+	margin-top: 15%;
+	/* min-width: 30%; */
+}
+
+.cardTitle{
+	text-align: center;
+	font-size: x-large;
+}
+
+.cardText{
+	padding: 2%;
+	text-align: justify;
 }

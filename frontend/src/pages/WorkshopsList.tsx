@@ -90,12 +90,8 @@ function WorkshopsList(props: WorkshopListProps) {
 
   return (
     <div>
-      <Container>
-        <h3>Welcome to the Containerized Workshops web page</h3>
-        <text>More things...</text>
-      </Container>
 
-      <Container>
+      <Container className={classes.topContainer}>
         <Row>
           <Col>
             <h4>List of Current Workshops:</h4>
