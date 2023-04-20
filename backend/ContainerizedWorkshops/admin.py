@@ -5,8 +5,6 @@ from django.contrib import admin
 from ContainerizedWorkshops.container import clear_containers
 from .models import Workshop, Snippet, TunneledPort
 
-# Register your models here.
-
 
 @admin.register(Workshop)
 class WorkshopAdmin(admin.ModelAdmin):

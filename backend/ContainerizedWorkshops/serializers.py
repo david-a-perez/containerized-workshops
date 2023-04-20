@@ -14,6 +14,7 @@ class SnippetSerializer(serializers.ModelSerializer):
         model = Snippet
         fields = ('__all__')
 
+
 class TunneledPortSerializer(serializers.ModelSerializer):
     class Meta:
         model = TunneledPort

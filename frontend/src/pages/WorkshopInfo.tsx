@@ -17,7 +17,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import adjust_ssh_powershell from "../resources/scripts/adjust_ssh_config.ps1";
 import adjust_ssh_bash from "../resources/scripts/adjust_ssh_config.sh";
+import copy_files_out_powershell from "../resources/scripts/copy_files_out.ps1";
 import copy_files_out_bash from "../resources/scripts/copy_files_out.sh";
+
 
 import bash_snippet_file from "../resources/scripts/snippet.sh";
 import powershell_snippet_file from "../resources/scripts/snippet.ps1";
@@ -298,6 +300,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
       await format_file(adjust_ssh_powershell, data)
     );
     zip.file("adjust_ssh_config.sh", await format_file(adjust_ssh_bash, data));
+    zip.file("copy_files_out.ps1", await format_file(copy_files_out_powershell, data));
     zip.file("copy_files_out.sh", await format_file(copy_files_out_bash, data));
 
     if (tunneled) {
