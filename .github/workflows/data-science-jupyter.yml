@@ -1,9 +1,9 @@
-name: jupyter-base
+name: data-science-jupyter
 
 on:
   push:
     paths:
-      - example-workshops/jupyter/**
+      - example-workshops/data-science-jupyter/**
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./example-workshops/jupyter
-          file: ./example-workshops/jupyter/Dockerfile
+          context: ./example-workshops/data-science-jupyter
+          file: ./example-workshops/data-science-jupyter/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/jupyter-base:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/data-science-jupyter:latest
