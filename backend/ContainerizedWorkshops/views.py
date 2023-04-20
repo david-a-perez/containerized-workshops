@@ -141,7 +141,7 @@ class ContainerViewSet(viewsets.ViewSet):
         if not request.data['user_id']:
             raise APIException()
 
-        if not (request.user.is_superuser or request.data['user_id'] == str(request.user.pk)):
+        if not (request.user.is_superuser or str(request.data['user_id']) == str(request.user.pk)):
             raise NotAdminOrParticipant()
 
         workshop = Workshop.objects.filter(
