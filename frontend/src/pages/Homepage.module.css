@@ -20,6 +20,7 @@
 	margin-left: 10%;
 	margin-right: 10%;
 	margin-top: 15%;
+	border-radius: 0%;
 	/* min-width: 30%; */
 }
 
@@ -29,6 +30,5 @@
 }
 
 .cardText{
-	padding: 2%;
-	text-align: justify;
+	text-align: left;
 }

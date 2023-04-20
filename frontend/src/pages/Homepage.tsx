@@ -12,13 +12,15 @@ function Homepage() {
       </Row>
       <Row lg={2} sm={1} xs={1}>
         <Col>
-          <Card className={classes.aboutCard}>
-            <Card.Title className={classes.cardTitle}>About</Card.Title>
-            <Card.Text className={classes.cardText}>This platform streamlines workshop delivery by addressing 
-          problems relating to inconsistent setups amongst participants. By hosting 
-          development environments in the cloud using Docker, we aim to ensure a 
-          smoother workshop experience. </Card.Text>
-          </Card>
+          <div className={classes.aboutCard}>
+            <h4 className={classes.cardTitle}>About</h4>
+            <p className={classes.cardText}>
+              This platform streamlines workshop delivery by addressing problems
+              relating to inconsistent setups amongst participants. By hosting
+              development environments in the cloud using Docker, we aim to
+              ensure a smoother workshop experience.
+            </p>
+          </div>
         </Col>
         <Col>
           <Image fluid src={image_path} className={classes.mainImage}></Image>
