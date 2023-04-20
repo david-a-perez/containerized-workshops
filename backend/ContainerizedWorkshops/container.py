@@ -42,6 +42,12 @@ def list_containers(workshop_id: str | None, user_id: str | None) -> list[Contai
             for container in redo_on_connection_error(lambda: client.containers.list(all=True, filters={
                 "label": [workshop_id_label, user_id_label, controller_id_label]}))]
 
+def pull_image(workshop: Workshop):
+    for client in DOCKER_CLIENTS:
+        split_docker_tag = workshop.docker_tag.split(":")
+
+        redo_on_connection_error(lambda: client.images.pull(split_docker_tag[0], split_docker_tag[1] if len(
+            split_docker_tag) > 1 else None))
 
 def create_container(workshop: Workshop, user_id: str, public_key: str) -> Container:
     workshop_id_label = f"{Labels.workshop_id.value}={workshop.pk}"

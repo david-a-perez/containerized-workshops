@@ -3,19 +3,25 @@ from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib import admin
 
 from ContainerizedWorkshops.container import clear_containers
+from backend.ContainerizedWorkshops.container import pull_image
 from .models import Workshop, Snippet, TunneledPort
 
 
 @admin.register(Workshop)
 class WorkshopAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Workshop._meta.fields]
-    actions = ['remove_containers']
+    actions = ['remove_containers', 'pull_image']
 
     def remove_containers(self, request, queryset):
         for workshop in queryset:
             clear_containers(workshop.pk, None)
 
+    def pull_image(self, request, queryset):
+        for workshop in queryset:
+            pull_image(workshop)
+
     remove_containers.short_description = "Remove all containers from selected workshops"
+    pull_image.short_description = "Pull all images from selected workshops"
 
 
 @admin.register(Snippet)

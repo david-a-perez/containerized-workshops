@@ -23,3 +23,8 @@ if ! grep -q "Host $WORKSHOP_NAME-workshop" $CONFIG; then
     echo "  Port $PORT" >> $CONFIG
     echo -e "\n" >> $CONFIG
 fi
+
+cp "$WORKSHOP_NAME-workshop.pem" "$KEY"
+chmod 600 "$KEY"
+
+ssh "$HostName-workshop" -- echo "ssh is working"
