@@ -2,8 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib import admin
 
-from ContainerizedWorkshops.container import clear_containers
-from backend.ContainerizedWorkshops.container import pull_image
+from ContainerizedWorkshops.container import clear_containers, pull_image
 from .models import Workshop, Snippet, TunneledPort
 
 
