@@ -19,5 +19,6 @@ class Command(BaseCommand):
             user.save()
 
             self.stdout.write(
-                self.style.SUCCESS('Successfully promoted user "%s"' % user_email)
+                self.style.SUCCESS(
+                    'Successfully promoted user "%s"' % user_email)
             )

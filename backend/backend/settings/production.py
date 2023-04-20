@@ -12,7 +12,7 @@ ALLOWED_HOSTS = ['localhost', 'cloudworkshops.dev']
 
 STATIC_URL = "/dj_static/"
 STATIC_ROOT = "/var/www/cloudworkshops.dev/static"
-STATICFILES_DIRS = [ BASE_DIR /  "../frontend/build"]
+STATICFILES_DIRS = [BASE_DIR / "../frontend/build"]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases

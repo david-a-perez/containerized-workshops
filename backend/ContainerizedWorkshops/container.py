@@ -13,6 +13,7 @@ from backend.settings.base import CONTROLLER_ID, DOCKER_HOSTS
 DOCKER_CLIENTS = [DockerClient(base_url=base_url)
                   for base_url in DOCKER_HOSTS]
 
+
 def redo_on_connection_error(x):
     try:
         return x()
@@ -22,6 +23,7 @@ def redo_on_connection_error(x):
     except paramiko.ssh_exception.SSHException as e:
         print("Socket error ignored:", e)
         return x()
+
 
 @unique
 class Labels(str, Enum):

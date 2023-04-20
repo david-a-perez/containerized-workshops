@@ -4,8 +4,6 @@ from django.core.validators import int_list_validator
 
 import shortuuid
 
-# Create your models here.
-
 
 def create_new_id():
     while True:

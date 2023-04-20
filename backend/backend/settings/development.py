@@ -1,7 +1,7 @@
 from .base import *
 
 CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
+    'http://localhost:3000'
 ]
 
 # SECURITY WARNING: don't run with debug turned on in production!
