@@ -1,5 +1,3 @@
-#  TODO List
+# Containerized Workshops
 
-1. Secure Workshop List to allow Users in Workshops that are not Admins to see their workshops
-
-2. Add both the powershell and bash commands to the snippets
+Our platform, cloudworkshops.dev, streamlines workshop delivery by addressing problems relating to inconsistent setups amongst participants. By hosting development environments in the cloud using Docker, we aim to ensure a smoother workshop experience. On the organizer side, a workshop leader creates a Dockerfile specifying all required packages and resources and creates a workshop using that Docker image. On the user side, participants join workshops and create their own personal Docker container. To automate the configuration process, the website supplies scripts to each user, facilitating their connection to said container. Afterwards, users can either use the Remote SSH extension from VSCode or directly launch the container-hosted jupyter notebook, depending on workshop type. Before the workshop terminates, users have the ability to download all work completed in the container onto their local computer.

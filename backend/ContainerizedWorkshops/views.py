@@ -1,28 +1,18 @@
-from enum import Enum, unique
-from django.shortcuts import render
-from rest_framework import viewsets, permissions
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.exceptions import APIException
-
-import docker
-import docker.errors
-import docker.transport
-from docker.models.containers import Container
-from docker import DockerClient
-from ContainerizedWorkshops.container import Labels, clear_containers, create_container, list_containers
-
-from .serializers import WorkshopSerializer, WorkshopReadSerializer, SnippetSerializer, TunneledPortSerializer, ContainerSerializer, UserSerializer
-from .models import Workshop, Snippet, TunneledPort
-from django.contrib.auth.models import User
-
-from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-
-# TODO: reminder to use get_serializer_class to have seperate read and write serializers
-# TODO: reminder to use permissions
-# TODO: reminder to add filterset_fields to other views
-# TODO: exception handling
+from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
+from .models import Workshop, Snippet, TunneledPort
+from .serializers import WorkshopSerializer, WorkshopReadSerializer, SnippetSerializer, TunneledPortSerializer, ContainerSerializer, UserSerializer
+from ContainerizedWorkshops.container import Labels, clear_containers, create_container, list_containers
+from docker import DockerClient
+from docker.models.containers import Container
+import docker.transport
+import docker.errors
+import docker
+from rest_framework.exceptions import APIException
+from rest_framework.decorators import action
+from rest_framework.response import Response
+git from rest_framework import viewsets, permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -45,13 +35,9 @@ class IsAdminOrOwnerParticipant(permissions.BasePermission):
                 (view.action == "list" and "user" in request.query_params and request.query_params["user"] == str(request.user.id)))
 
 
-# Create your views here.
-
-
 class WorkshopView(viewsets.ModelViewSet):
     queryset = Workshop.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
-    # TODO: filter probably not necessary
     filterset_fields = ['title', 'participants']
 
     def get_serializer_class(self):
@@ -100,7 +86,7 @@ def serialize_container(container: Container):
         raise APIException()
     if not container.attrs:
         raise APIException()
-    
+
     client: DockerClient = container.client
     public_ip = client.api._custom_adapter.ssh_params['hostname'] if isinstance(
         client.api._custom_adapter, docker.transport.SSHHTTPAdapter) else "127.0.0.1"
@@ -130,7 +116,8 @@ class ContainerViewSet(viewsets.ViewSet):
             request.query_params['workshop_id'] if 'workshop_id' in request.query_params else None,
             (request.query_params['user_id'] if 'user_id' in request.query_params else None) if request.user.is_superuser else str(request.user.pk))
 
-        serializer = ContainerSerializer([serialize_container(container) for container in containers], many=True)
+        serializer = ContainerSerializer([serialize_container(
+            container) for container in containers], many=True)
 
         return Response(serializer.data)
 
@@ -152,19 +139,19 @@ class ContainerViewSet(viewsets.ViewSet):
 
         if not workshop.participants.filter(pk=request.data['user_id']).exists():
             raise NotInWorkshop()
-        
-        container = create_container(workshop, request.data['user_id'], request.data['public_key'])
+
+        container = create_container(
+            workshop, request.data['user_id'], request.data['public_key'])
 
         serializer = ContainerSerializer(serialize_container(container))
         return Response(serializer.data)
 
-    
     @action(detail=False, methods=['post'])
     def clear(self, request):
         clear_containers(
             request.query_params['workshop_id'] if 'workshop_id' in request.query_params else None,
             (request.query_params['user_id'] if 'user_id' in request.query_params else None) if request.user.is_superuser else str(request.user.pk))
-        
+
         return Response()
 
 
