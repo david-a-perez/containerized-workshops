@@ -257,7 +257,7 @@ function WorkshopInfo(props: WorkshopInfoProps) {
     let privKeyFile = new Blob([privateKey], { type: "text/plain" });
 
     // set the data for the workshop
-    const host_name = workshop?.title.replaceAll(" ", "_") + "-" + workshop?.id;
+    const host_name = workshop?.title.replaceAll(" ", "_") + "-" + cur_container.id.substring(0, 12);
 
     // map the exposed ports in the container to their host port
     const exposed_ports_dict: { [key: string]: Number } = {};
